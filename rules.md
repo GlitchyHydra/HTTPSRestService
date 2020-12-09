@@ -61,7 +61,7 @@ ERROR: HTTP 400
 ### Авторизация
 #### Request:
 
-##### POST `/freelancer/`
+##### POST `/login/`
 
 ```json
 {
@@ -150,7 +150,7 @@ ERROR: HTTP 400
 ### Авторизация
 #### Request:
 
-##### POST `/customer/`
+##### POST `/login/`
 
 ```json
 {
