@@ -2,7 +2,7 @@
 ### Просмотр открытых предложений
 #### Request:
 
-##### GET `/orders/`
+##### GET `/orders/open`
 
 #### Response:
 OK: HTTP 200
