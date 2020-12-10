@@ -13,18 +13,20 @@
 
 #### Response:
 OK: HTTP 200
-{\n
+```{
 "token" : str
 }
+```
 
 ERROR: HTTP 400
 
 ## Фрилансер
 ### Просмотр открытых предложений
 #### Request:
-{
+```{
 "token" : str
 }
+```
 
 ##### GET `/orders/opened`
 
@@ -43,9 +45,10 @@ ERROR: HTTP 400
 
 ### Просмотр своих заявок
 #### Request:
-{
+```{
 "token" : str
 }
+```
 
 ##### GET `/applications/`
 
@@ -68,9 +71,10 @@ ERROR: HTTP 400
 
 ### Добавление заявки на выполнения предложения
 #### Request:
-{
+```{
 "token" : str
 }
+```
 
 ##### POST `/orders/<id:int>/`
 
@@ -81,9 +85,10 @@ ERROR: HTTP 400
 
 ### Фиксация выполнения работы
 #### Request:
-{
+```{
 "token" : str
 }
+```
 
 ##### PUT `/applications/<id:int>/`
 
@@ -113,9 +118,10 @@ ERROR: HTTP 400
 
 ### Просмотр всех своих предложений
 #### Request:
-{
+```{
 "token" : str
 }
+```
 
 ##### GET `/orders/`
 
@@ -134,9 +140,10 @@ ERROR: HTTP 400
 
 ### Изменения статуса предложения
 #### Request:
-{
+```{
 "token" : str
 }
+```
 
 ##### PUT `/orders/<id:int>/`
 
@@ -154,9 +161,10 @@ ERROR: HTTP 400
 
 ### Утверждение заявки на предложение
 #### Request:
-{
+```{
 "token" : str
 }
+```
 
 ##### POST `/orders/<order_id:int>/applications/<application_id:int>/`
 
@@ -167,9 +175,10 @@ ERROR: HTTP 400
 
 ### Подтверждение выполненной работы
 #### Request:
-{
+```{
 "token" : str
 }
+```
 
 ##### PUT `/orders/<order_id>/applications/<application_id>/`
 
