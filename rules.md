@@ -19,7 +19,7 @@ OK: HTTP 200
 }
 ```
 
-ERROR: HTTP 400
+ERROR: HTTP 401
 
 ## Фрилансер
 ### Просмотр открытых предложений
@@ -43,7 +43,7 @@ OK: HTTP 200
 }, ...]
 ```
 
-ERROR: HTTP 400
+ERROR: HTTP 400, 401
 
 ### Просмотр своих заявок
 #### Request:
@@ -70,7 +70,7 @@ OK: HTTP 200
 }, ...]
 ```
 
-ERROR: HTTP 400
+ERROR: HTTP 400, 401
 
 ### Добавление заявки на выполнения предложения
 #### Request:
@@ -85,7 +85,7 @@ ERROR: HTTP 400
 #### Response:
 OK: HTTP 200
 
-ERROR: HTTP 400
+ERROR: HTTP 400, 401
 
 ### Фиксация выполнения работы
 #### Request:
@@ -100,7 +100,7 @@ ERROR: HTTP 400
 #### Response:
 OK: HTTP 200
 
-ERROR: HTTP 400
+ERROR: HTTP 400, 401
 
 ## Заказчик
 ### Добавление предложения
@@ -119,7 +119,7 @@ ERROR: HTTP 400
 #### Response:
 OK: HTTP 200
 
-ERROR: HTTP 400
+ERROR: HTTP 400, 401
 
 ### Просмотр всех своих предложений
 #### Request:
@@ -142,7 +142,7 @@ OK: HTTP 200
 }, ...]
 ```
 
-ERROR: HTTP 400
+ERROR: HTTP 400, 401
 
 ### Изменения статуса предложения
 #### Request:
@@ -164,7 +164,7 @@ IN_WORK/CLOSE - Enum
 #### Response:
 OK: HTTP 200
 
-ERROR: HTTP 400
+ERROR: HTTP 400, 401
 
 ### Утверждение заявки на предложение
 #### Request:
@@ -179,7 +179,7 @@ ERROR: HTTP 400
 #### Response:
 OK: HTTP 200
 
-ERROR: HTTP 400
+ERROR: HTTP 400, 401
 
 ### Подтверждение выполненной работы
 #### Request:
@@ -194,7 +194,7 @@ ERROR: HTTP 400
 #### Response:
 OK: HTTP 200
 
-ERROR: HTTP 400
+ERROR: HTTP 400, 401
 
 # Server
 Для всех ошибочных(ERROR) реквестов:
