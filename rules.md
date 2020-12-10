@@ -13,7 +13,7 @@
 
 #### Response:
 OK: HTTP 200
-{
+{\n
 "token" : str
 }
 
