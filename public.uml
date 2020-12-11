@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DATABASE</ID>
+  <OriginalElement>844753f3-cf90-4935-9ee5-130d939024ed.SCHEMA:freelancer_bd.public</OriginalElement>
+  <nodes>
+    <node x="98.37500000000001" y="567.0">844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.applications</node>
+    <node x="172.75" y="0.0">844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.info</node>
+    <node x="14.5" y="211.0">844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.customers</node>
+    <node x="0.0" y="378.0">844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.orders</node>
+    <node x="216.25" y="211.0">844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.freelancers</node>
+    <node x="5.75" y="22.0">844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.users</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.applications" target="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.orders">
+      <point x="-36.5" y="-80.5" />
+      <point x="134.875" y="542.0" />
+      <point x="70.5" y="542.0" />
+      <point x="0.0" y="69.5" />
+    </edge>
+    <edge source="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.orders" target="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.customers">
+      <point x="0.0" y="-69.5" />
+      <point x="0.0" y="58.5" />
+    </edge>
+    <edge source="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.applications" target="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.freelancers">
+      <point x="36.5" y="-80.5" />
+      <point x="207.875" y="542.0" />
+      <point x="272.25" y="542.0" />
+      <point x="0.0" y="58.5" />
+    </edge>
+    <edge source="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.freelancers" target="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.info">
+      <point x="28.0" y="-58.5" />
+      <point x="42.5" y="80.5" />
+    </edge>
+    <edge source="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.freelancers" target="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.users">
+      <point x="-28.0" y="-58.5" />
+      <point x="244.25" y="181.0" />
+      <point x="116.0" y="181.0" />
+      <point x="36.75" y="58.5" />
+    </edge>
+    <edge source="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.customers" target="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.info">
+      <point x="28.0" y="-58.5" />
+      <point x="98.5" y="191.0" />
+      <point x="215.25" y="191.0" />
+      <point x="-42.5" y="80.5" />
+    </edge>
+    <edge source="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.customers" target="844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.users">
+      <point x="-28.0" y="-58.5" />
+      <point x="-36.75" y="58.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="168.5" y="309.0" />
+  <SelectedNodes>
+    <node>844753f3-cf90-4935-9ee5-130d939024ed.TABLE:freelancer_bd.public.orders</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Key columns</Category>
+    <Category>Columns</Category>
+    <Category>Virtual foreign keys</Category>
+  </Categories>
+</Diagram>
+
