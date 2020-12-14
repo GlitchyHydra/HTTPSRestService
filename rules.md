@@ -2,10 +2,10 @@
 ### Авторизация
 #### Request:
 
-##### POST `/login/<role:str>`
-```
-"role": "freelacer" or "customer" [не обязательное поле, если не прислано, то ищется в обоих таблицах]
-```
+##### POST `/login`
+
+`"role": "freelacer" or "customer" [не обязательное поле, если не прислано, то ищется в обоих таблицах]`
+
 ```json
 {
     "login": str,
@@ -15,9 +15,10 @@
 
 #### Response:
 OK: HTTP 200
-```
+```json
 {
-"token" : str
+    "role": str,
+    "token" : str
 }
 ```
 
@@ -26,13 +27,13 @@ ERROR: HTTP 401
 ## Фрилансер
 ### Просмотр открытых предложений
 #### Request:
-```
+##### GET `/orders/`
+
+```json
 {
-"token" : str
+    "token" : str
 }
 ```
-
-##### GET `/orders/opened`
 
 #### Response:
 OK: HTTP 200
@@ -49,13 +50,12 @@ ERROR: HTTP 400, 401
 
 ### Просмотр своих заявок
 #### Request:
-```
+##### GET `/applications/`
+```json
 {
-"token" : str
+    "token" : str
 }
 ```
-
-##### GET `/applications/`
 
 #### Response:
 OK: HTTP 200
@@ -68,7 +68,7 @@ OK: HTTP 200
         "name": str,
         "desc": str
     },
-    "status": IN_WORK/DONE
+    "status": "opened" / "approved" / "closed" / "done"
 }, ...]
 ```
 
@@ -76,13 +76,13 @@ ERROR: HTTP 400, 401
 
 ### Добавление заявки на выполнения предложения
 #### Request:
-```
+##### POST `/orders/<order_id:int>/`
+
+```json
 {
-"token" : str
+    "token" : str
 }
 ```
-
-##### POST `/orders/<id:int>/`
 
 #### Response:
 OK: HTTP 200
@@ -91,13 +91,12 @@ ERROR: HTTP 400, 401
 
 ### Фиксация выполнения работы
 #### Request:
-```
+##### PUT `/applications/<application_id:int>/`
+```json
 {
-"token" : str
+    "token" : str
 }
 ```
-
-##### PUT `/applications/<id:int>/`
 
 #### Response:
 OK: HTTP 200
@@ -125,13 +124,14 @@ ERROR: HTTP 400, 401
 
 ### Просмотр всех своих предложений
 #### Request:
-```
+##### GET `/orders/`
+```json
 {
-"token" : str
+    "token" : str,
+    "status": "opened" / "in work" / "closed" / "all"
 }
 ```
-
-##### GET `/orders/`
+`status == "opened" by default`
 
 #### Response:
 OK: HTTP 200
@@ -140,7 +140,11 @@ OK: HTTP 200
 [{
     "id": int,
     "name": str,
-    "desc": str
+    "desc": str,
+    "applications": [{
+        "id": int,
+        "status": "status": "opened" / "approved" / "closed" / "done"
+    }, ... ]
 }, ...]
 ```
 
@@ -148,20 +152,14 @@ ERROR: HTTP 400, 401
 
 ### Изменения статуса предложения
 #### Request:
-``
-`{
-"token" : str
-}
-```
 
 ##### PUT `/orders/<id:int>/`
-
 ```json
 {
-    "status": IN_WORK/CLOSE
+    "token" : str,
+    "status": "in work" / "closed"
 }
 ```
-IN_WORK/CLOSE - Enum
 
 #### Response:
 OK: HTTP 200
@@ -170,13 +168,13 @@ ERROR: HTTP 400, 401
 
 ### Утверждение заявки на предложение
 #### Request:
-```
+##### POST `/applications/<application_id:int>/`
+```json
 {
-"token" : str
+    "token" : str
 }
 ```
 
-##### POST `/orders/<order_id:int>/applications/<application_id:int>/`
 
 #### Response:
 OK: HTTP 200
@@ -185,13 +183,13 @@ ERROR: HTTP 400, 401
 
 ### Подтверждение выполненной работы
 #### Request:
-```
+##### PUT `/applications/<application_id>/`
+
+```json
 {
-"token" : str
+    "token" : str
 }
 ```
-
-##### PUT `/orders/<order_id>/applications/<application_id>/`
 
 #### Response:
 OK: HTTP 200
@@ -206,12 +204,5 @@ ERROR: HTTP 400, 401
         "text": str, - текст ошибки
         "code": int - код ошибки
     }
-}
-```
-
-Для всех успешных(OK) реквестов (если выше не задан body):
-```json
-{
-    "response": "ok"
 }
 ```
