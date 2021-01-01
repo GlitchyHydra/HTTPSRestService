@@ -91,10 +91,11 @@ ERROR: HTTP 400, 401
 
 ### Фиксация выполнения работы
 #### Request:
-##### PUT `/applications/<application_id:int>/`
+##### PUT `/works/<work_id:int>/`
 ```json
 {
-    "token" : str
+    "token" : str,
+    "status": str (Done)
 }
 ```
 
@@ -183,11 +184,12 @@ ERROR: HTTP 400, 401
 
 ### Подтверждение выполненной работы
 #### Request:
-##### PUT `/applications/<application_id>/`
+##### PUT `/works/<work_id>/`
 
 ```json
 {
-    "token" : str
+    "token" : str,
+    "status": str (Close)
 }
 ```
 
