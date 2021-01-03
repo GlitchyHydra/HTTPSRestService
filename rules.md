@@ -177,7 +177,6 @@ ERROR: HTTP 400, 401
 {
     "error": {
         "text": str, - текст ошибки
-        "code": int - код ошибки
     }
 }
 ```
