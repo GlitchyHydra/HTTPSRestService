@@ -1,5 +1,5 @@
 ### Токен
-`Располагается в заголовке по типу Authorization : Bearer token_value`
+`Располагается в заголовке по типу Authorization: <type=Bearer> <credentials=token>`
 `При каждом запросе, помимо Авторизации`
 
 ### Авторизация
