@@ -58,7 +58,7 @@ OK: HTTP 200
         "name": str,
         "desc": str
     },
-    "status": "opened" / "approved" / "closed" / "done"
+    "status": "Open" / "Rejected" / "Accepted"
 }, ...]
 ```
 
