@@ -1,3 +1,6 @@
+### Токен
+`Располагается в заголовке по типу Authorization : Bearer token_value`
+`При каждом запросе, помимо Авторизации`
 
 ### Авторизация
 #### Request:
@@ -29,12 +32,6 @@ ERROR: HTTP 401
 #### Request:
 ##### GET `/orders/`
 
-```json
-{
-    "token" : str
-}
-```
-
 #### Response:
 OK: HTTP 200
 
@@ -51,11 +48,6 @@ ERROR: HTTP 400, 401
 ### Просмотр своих заявок
 #### Request:
 ##### GET `/applications/`
-```json
-{
-    "token" : str
-}
-```
 
 #### Response:
 OK: HTTP 200
@@ -78,12 +70,6 @@ ERROR: HTTP 400, 401
 #### Request:
 ##### POST `/orders/<order_id:int>/`
 
-```json
-{
-    "token" : str
-}
-```
-
 #### Response:
 OK: HTTP 200
 
@@ -94,7 +80,6 @@ ERROR: HTTP 400, 401
 ##### PUT `/works/<work_id:int>/`
 ```json
 {
-    "token" : str,
     "status": str (Done)
 }
 ```
@@ -112,9 +97,8 @@ ERROR: HTTP 400, 401
 
 ```json
 {
-    "token" : str,
     "name": str,
-    "desc": str
+    "desc": str (not required)
 }
 ```
 
@@ -128,11 +112,10 @@ ERROR: HTTP 400, 401
 ##### GET `/orders/`
 ```json
 {
-    "token" : str,
-    "status": "opened" / "in work" / "closed" / "all"
+    "status": "Open" / "Processing" / "Close"
 }
 ```
-`status == "opened" by default`
+`status == "Open" by default`
 
 #### Response:
 OK: HTTP 200
@@ -144,7 +127,7 @@ OK: HTTP 200
     "desc": str,
     "applications": [{
         "id": int,
-        "status": "status": "opened" / "approved" / "closed" / "done"
+        "status": "status": "Open" / "Rejected" / "Accepted"
     }, ... ]
 }, ...]
 ```
@@ -157,8 +140,7 @@ ERROR: HTTP 400, 401
 ##### PUT `/orders/<id:int>/`
 ```json
 {
-    "token" : str,
-    "status": "in work" / "closed"
+    "status": "Processing" / "Close"
 }
 ```
 
@@ -169,13 +151,7 @@ ERROR: HTTP 400, 401
 
 ### Утверждение заявки на предложение
 #### Request:
-##### POST `/applications/<application_id:int>/`
-```json
-{
-    "token" : str
-}
-```
-
+##### PUT `/applications/<application_id:int>/`
 
 #### Response:
 OK: HTTP 200
@@ -188,7 +164,6 @@ ERROR: HTTP 400, 401
 
 ```json
 {
-    "token" : str,
     "status": str (Close)
 }
 ```
