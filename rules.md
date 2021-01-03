@@ -7,8 +7,6 @@
 
 ##### POST `/login`
 
-`"role": "freelacer" or "customer" [не обязательное поле, если не прислано, то ищется в обоих таблицах]`
-
 ```json
 {
     "login": str,
