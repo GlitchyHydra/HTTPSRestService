@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace DataLayer.Models
+namespace DataLayer.Models.Database
 {
     public enum OrderStatus
     {
-        OPEN = 0,
-        IN_WORK = 1,
-        CLOSE = 2
+        Open       = 0,
+        Processing = 1,
+        Close      = 2
     }
     [Table("orders")]
     public class Order
@@ -26,5 +27,7 @@ namespace DataLayer.Models
         public string Name { get; set; }
         [Column("desc")]
         public string Desc { get; set; }
+
+        public List<Application> Applications { get; set; }
     }
 }

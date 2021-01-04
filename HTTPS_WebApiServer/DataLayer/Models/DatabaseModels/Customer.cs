@@ -1,7 +1,7 @@
 ﻿using Npgsql;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataLayer.Models
+namespace DataLayer.Models.Database
 {
     public class Customer
     {

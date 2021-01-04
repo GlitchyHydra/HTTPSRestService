@@ -10,6 +10,8 @@ using DataLayer.Services;
 using Microsoft.AspNetCore.Http;
 using LettuceEncrypt;
 using System.IO;
+using UserMiddleware.Interfaces;
+using UserMiddleware.Services;
 
 namespace HTTPS_WebApiServer
 {
@@ -22,8 +24,6 @@ namespace HTTPS_WebApiServer
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLettuceEncrypt().PersistDataToDirectory(new DirectoryInfo("D:/data/Lettuce/Ecnrypt"), "57247LaLol22"); ;
@@ -31,8 +31,8 @@ namespace HTTPS_WebApiServer
             services.AddMvc();
             services.AddSession();
             services.AddTransient<IAuthorizationService, AuthorizationService>();
-            services.AddTransient<ICustomerService, CustomerService>();
-            services.AddTransient<IFreelancerService, FreelancerService>();
+            services.AddTransient<IUserAccessService, UserAccessService>();
+            services.AddTransient<IUserDataService, UserDataService>();
             services.AddMemoryCache();
             //Db connection
             var sqlConnectionString = Configuration.GetConnectionString("DefaultConnection");
@@ -51,14 +51,16 @@ namespace HTTPS_WebApiServer
             {
                 app.UseDeveloperExceptionPage();
             }
-           
-            //ROUTING ZONE
+
+            /*--------------------------ROUTING ZONE----------------------------*/
+            app.UseHttpsRedirection();
+
+            //add endpoint resolution middlware
             app.UseRouting();
             //security
-            app.UseAuthentication();
             //app.UseAuthorization();
 
-            //END ROUTING ZONE
+            /*-------------------------END ROUTING ZONE---------------------------*/
             app.UseEndpoints(endpoints =>
             {
 

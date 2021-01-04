@@ -1,37 +1,34 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using DataLayer;
-using DataLayer.Services;
-using DataLayer.Models;
-using HTTPS_WebApiServer.Contracts;
+using DataLayer.Models.Server;
+using UserMiddleware.Interfaces;
 
 namespace HTTPS_WebApiServer.Controllers
 {
-    public class LoginResponse
-    {
-        public string Token { get; set; }
-    }
-
-    [Route("login")]
+    [Route("/login")]
     public class AuthorizationController : Controller
     {
-        private readonly IAuthorizationService authorizationService;
+        private readonly IAuthorizationService authorization_service;
 
         public AuthorizationController(IAuthorizationService serv)
         {
-            authorizationService = serv;
+            authorization_service = serv;
         }
 
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            //TODO REDIRECT FROM HTTP TO HTTPS WHEN TRYING TO LOGIN
-            var role = authorizationService.Authenthicate(model);
-            if (role == RoleId.None) return Unauthorized();
+            if (model is null) return BadRequest(new { errorText = "lack of username or password" });
             else
             {
-                var token = authorizationService.Authorize(model).Result;
-                return new ObjectResult(new LoginResponse { Token = token });
+                //TODO REDIRECT TO HTTPS WHEN TRY TO LOGIN
+                var user_id = await authorization_service.Authenthicate(model);
+                if (user_id == -1) return Unauthorized(new { errorText = "Invalid username or password" });
+                else
+                {
+                    var token = await authorization_service.Authorize(user_id);
+                    return Ok(token);
+                }
             }
         }
     }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataLayer.Models
+namespace DataLayer.Models.Database
 {
     /*
     * Table name: freelancers 

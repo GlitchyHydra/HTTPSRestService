@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-
-namespace FreelancerServer.Authentication
+﻿namespace DataLayer.Models.Server
 {
-    public class UserRoles
+    public enum UserRole
     {
-        public const string Freelancer = "Freelancer";
-        public const string Customer   = "Customer";
+        Freelancer       =  1,
+        Customer         =  2,
+        None             = -1
     }
 }

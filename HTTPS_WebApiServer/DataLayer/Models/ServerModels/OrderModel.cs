@@ -4,12 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace HTTPS_WebApiServer.Contracts
+namespace DataLayer.Models.Server
 {
     [JsonObject, Serializable]
     public class OrderModel
     {
         public string name { get; set; }
-        public string desc { get; set; }
+        public string? desc { get; set; }
     }
 }

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataLayer.Models
+namespace DataLayer.Models.Database
 {
     public enum ApplcationStatus
     {
-        OPEN     = 0,
-        ACCEPTED = 1,
-        REJECTED = 2
+        Open     = 0,
+        Accepted = 1,
+        Rejected = 2
     }
 
     [Table("applications")]
