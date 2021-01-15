@@ -1,32 +1,28 @@
-import client.src.client as c
+import client.src.data as c
+import client.src.utilz as u
 
 def get_orders(client):
     path = 'orders/'
-    data = {
-        'token': client.token,
-    }
-    pass
+    return u.get(path, header=client.token_header)
+
 
 def get_applications(client):
     path = 'applications/'
-    data = {
-        'token': client.token,
-    }
-    pass
+    return u.get(path, header=client.token_header)
+
 
 def add_application(client, id):
-    path = f'orders/{id}'
-    data = {
-        'token': client.token,
-    }
-    pass
+    path = f'orders/{id}/'
+    return u.post(path, header=client.token_header)
+
 
 def application_done(client, id):
-    path = f'applications/{id}'
+    path = f'works/{id}/'
     data = {
-        'token': client.token,
-    }a
-    pass
+        'status': 'Done'
+    }
+    return u.put(path, data=data, header=client.token_header)
+
 
 def print_orders(orders):
     for order in orders:
@@ -35,11 +31,13 @@ def print_orders(orders):
             f'\t\tdescription: {order["desc"]}\n'
         )
 
+
 def print_applications(applications):
-    for application in applcations:
+    for application in applications:
         print(
             f'\tid: {application["id"]} order_id: {application["order_id"]}'
         )
+
 
 def eloop(client):
     while True:
@@ -50,14 +48,14 @@ def eloop(client):
 
         if inp == 'get orders':
             r = get_orders(client)
-            if not needed_relogin(r, client):
+            if u.needed_relogin(r, client):
                 break
 
-            print_orders(r)
+            print_orders(r.json())
 
         elif inp == 'get applications':
             r = get_applications(client)
-            if not needed_relogin(r, client):
+            if u.needed_relogin(r, client):
                 break
 
             print_applications(r)
@@ -74,11 +72,11 @@ def eloop(client):
                     continue
                 order_id = inp_order_id
             r = add_application(client, order_id)
-            if not needed_relogin(r, client):
+            if u.needed_relogin(r, client):
                 break
-            print('Application added')
+            print(f'Application to order with id={order_id} was added')
 
-        elif inp == 'done':
+        elif inp == 'mark done':
             order_id = -1
             application_id = -1
             while not (inp_order_id := input('order id: ')):
@@ -90,7 +88,7 @@ def eloop(client):
                     print('Positive int required. Try again')
                     continue
                 order_id = inp_order_id
-            
+
             while not (inp_appcliation_id := input('application id: ')):
                 try:
                     inp_appcliation_id = int(inp_appcliation_id)
@@ -100,17 +98,21 @@ def eloop(client):
                     print('Positive int required. Try again')
                     continue
                 application_id = inp_appcliation_id
-            
+
             r = application_done(client, order_id, application_id)
-            if not needed_relogin(r, client):
+            if u.needed_relogin(r, client):
                 break
-            print('Application done')
+            print(f'Application with id={application_id} to order with id={order_id} marked as done')
+
+        elif inp == 'quit':
+            break
 
         else:
             print(
                 '"get orders" to get list of orders\n'
                 '"get applications" to get your application list\n'
                 '"add application" to add application for specific order\n'
-                '"done" to mark specific application as done\n'
+                '"mark done" to mark specific application as done\n'
+                '"quit" to quit the application\n'
                 '"help" to see this help'
             )

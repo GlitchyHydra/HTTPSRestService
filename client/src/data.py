@@ -3,17 +3,17 @@ from enum import Enum
 import client.src.utilz as u
 
 class OrderStatus(Enum):
-    IN_WORK = 'in_work'
+    PROCESSING = 'processing'
     CLOSE = 'close'
     OPEN = 'open'
 
     @property
-    def statuses(self):
-        statuses = {}
-        for i, status in enumerate([OrderStatus.IN_WORK, OrderStatus.CLOSE]):
-            statuses[i] = status
-        return statuses
+    def on_add(self):
+        return [OrderStatus.OPEN, OrderStatus.CLOSE, OrderStatus.PROCESSING]
 
+    @property
+    def on_change(self):
+        return [OrderStatus.CLOSE, OrderStatus.PROCESSING]
 
 class Role:
     FREELANCER = 'freelances'
@@ -42,9 +42,8 @@ class Client:
             'password': self.password,
         }
 
-
-def login(client):
-    path = f'login/{client.role}'
-    r = u.get(path)
-    if r:
-        client.token = r.json()['token']
+    @property
+    def token_header(self):
+        return {
+            'Authorization': f'Bearer {token}'
+        }

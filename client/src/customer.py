@@ -1,37 +1,40 @@
 import client.src.data as d
-from client.src.utilz import needed_relogin
+import client.src.utilz as u
 
 
 def add_order(client, order):
     path = 'orders/'
     data = order
-    data['token'] = client.token
-    pass
+    return u.post(path, data=data, header=client.token_header)
 
 
-def get_orders(client):
+def get_orders(client, status):
     path = 'orders/'
     data = {
-        'token': client.token,
+        'status': status
     }
-    pass
+    return u.get(path, data=data, headers=client.token_header)
 
 
 def change_order_status(client, id, new_status):
-    path = f'orders/{id}'
+    path = f'orders/{id}/'
     data = {
-        'status': new_status,
-        'token': client.token,
+        'status': new_status
     }
-    pass
+    return u.put(path, data=data, headers=client.token_status)
 
 
-def application_approval(client, order_id, application_id, done=False):
-    path = f'orders/{order_id}/applications/{application_id}'
+def application_approval(client, application_id):
+    path = f'applications/{application_id}/'
+    return u.put(path, headers=client.token_header)
+
+
+def work_done(client, work_id):
+    path = f'works/{work_id}/'
     data = {
-        'token': client.token,
+        'status': 'Close'
     }
-    pass
+    return u.put(path, data=data, headers=client.token_header)
 
 
 def print_orders(orders):
@@ -55,15 +58,27 @@ def eloop(client):
                 order['name'] = name
             order['desc'] = input('description: ')
             r = add_order(client, order)
-            if not needed_relogin(r, client):
+            if u.needed_relogin(r, client):
                 break
+
+            print(f'Order {order} added successfuly')
 
         elif inp == 'get orders':
-            r = get_orders(client)
-            if not needed_relogin(r, client):
+            status = ''
+            while True:
+                inp_status = input(f'status [{d.OrderStatus.on_add}]: ')
+                if not inp_status:
+                    status = 'open'.title()
+                    break
+                if inp_status.lower() in d.OrderStatus.on_add:
+                    status = inp_status.title()
+                    break
+
+            r = get_orders(client, status)
+            if u.needed_relogin(r, client):
                 break
 
-            print_orders(r)
+            print_orders(r.json())
 
         elif inp == 'change order status':
             id = 0
@@ -78,43 +93,20 @@ def eloop(client):
                     continue
 
                 id = inp_id
-            accepted_statuses = d.OrderStatus.statuses
-            accepted_statuses_text = ''
-            for i, status in accepted_statuses.items():
-                accepted_statuses_text += f'({i}) {status}, '
-            accepted_statuses_text = accepted_statuses_text[:-2]
 
-            print('Choose status (int):')
-            while not (inp_status := input(f'status [{accepted_statuses_text}]: ')):
-                try:
-                    inp_status = int(inp_status)
-                except:
-                    print('Int required. Try again')
-                    continue
+            while not (inp_status := input(f'status [{d.OrderStatus.on_change}]: ')):
+                if inp_status.lower() in d.OrderStatus.on_add:
+                    status = inp_status.title()
+                    break
 
-                if not accepted_statuses.get(inp_status):
-                    print(
-                        f'Status with {inp_status} does not exist. Try again')
-                    continue
-
-                status = accepted_statuses[inp_status]
             r = change_order_status(client, id, status)
-            if not needed_relogin(r, client):
+            if u.needed_relogin(r, client):
                 break
 
+            print(f'Order with id={id} status changed to {status}')
+
         elif inp == 'approve application':
-            order_id = -1
             application_id = -1
-            done = False
-            while not (inp_order_id := input('order id: ')):
-                try:
-                    inp_order_id = int(inp_order_id)
-                    if inp_order_id <= 0:
-                        raise
-                except:
-                    print('Positive int required. Try again')
-                    continue
-                order_id = inp_order_id
 
             while not (inp_appcliation_id := input('application id: ')):
                 try:
@@ -126,24 +118,41 @@ def eloop(client):
                     continue
                 application_id = inp_appcliation_id
 
-            while not (inp_done := input('apply or done: ').lower().strip()):
-                if inp_done == 'apply':
-                    done = False
-                elif inp_done == 'done':
-                    done = True
-                else:
-                    print('Put apply or done')
-                    continue
-
-            r = application_approval(clinet, order_id, application_id, done)
-            if not needed_relogin(r, client):
+            r = application_approval(client, application_id)
+            if u.needed_relogin(r, client):
                 break
+            
+            print(f'Application with id={application_id} approved')
+
+        elif inp == 'mark work':
+            work_id = -1
+
+            while not (inp_work_id := input('work id: ')):
+                try:
+                    inp_work_id = int(inp_work_id)
+                    if inp_work_id <= 0:
+                        raise
+                except:
+                    print('Positive int required. Try again')
+                    continue
+                work_id = inp_work_id
+
+            r = work_done(client, work_id)
+            if u.needed_relogin(r, client):
+                break
+            
+            print(f'Work with id={work_id} marked as done (closed)')
+
+        elif inp == 'quit':
+            break
 
         else:
             print(
                 '"add order" to add order\n'
                 '"get orders" to see your order list\n'
                 '"change order status" to change specific order status\n'
-                '"approve application" to approce specific application (apply or mark as done)\n'
+                '"approve application" to approve specific application\n'
+                '"mark work" to mark work as done (close)\n'
+                '"quit" to quit the application\n'
                 '"help" to see this help'
             )

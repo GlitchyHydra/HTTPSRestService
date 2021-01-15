@@ -17,13 +17,17 @@ def main():
         if not r.get('error'):
             client.token = r['token']
             client.role = r['role']
+            print('Logined successfuly')
             break
         else:
-            print(r['error']['text'])
+            print(r['error'])
+
     if client.role == d.Role.CUSTOMER:
         cust.eloop(client)
     else:
         free.eloop(client)
 
-#main()
+    print('Goodbye')
+
+main()
     
