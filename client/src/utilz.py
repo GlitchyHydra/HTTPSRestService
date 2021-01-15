@@ -88,5 +88,5 @@ def relogin(client):
 class RequestError(Exception):
     def __init__(self, path, request):
         super().__init__(message)
-        self.message = f'Error with request to {BASE_URL + path} with {request.json()["error"]}'
+        self.message = f'Error with request to {BASE_URL + path} with {request.json()["error"]["text"]}'
         self.request = request
