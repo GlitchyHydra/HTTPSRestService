@@ -107,13 +107,12 @@ ERROR: HTTP 400, 401
 
 ### Просмотр всех своих предложений
 #### Request:
-##### GET `/orders/`
+##### GET `/orders/<status:str>`
 ```json
 {
-    "status": "Open" / "Processing" / "Close"
+    "status": "open" / "processing" / "close"
 }
 ```
-`status == "Open" by default`
 
 #### Response:
 OK: HTTP 200
