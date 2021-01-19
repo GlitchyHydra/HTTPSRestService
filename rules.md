@@ -76,7 +76,7 @@ OK: HTTP 200
     "id": int,
     "order_id": int,
     "freelancer_id" : int,
-    "status": "Open" / "Rejected" / "Accepted",
+    "status": "open" / "processing" / "done" / "close",
     work_date : str
 }, ...]
 ```
