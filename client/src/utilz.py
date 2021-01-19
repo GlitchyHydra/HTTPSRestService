@@ -1,56 +1,58 @@
 import requests
 import json
-from client.src.data import Client
 
-BASE_URL = ''
+BASE_URL = 'https://glitchyhydra.ddns.net'
 
 
-def post(path, data={}, headers={}):
+def post(path, data={}, headers={}, params={}):
     result = None
     try:
-        result = _post(path, data, headers)
+        result = _post(path, data, headers, params).json()
     except RequestError as e:
-        result = {'error': e.message, 'request': e.request}
+        result = {'error': e.message, 'responce': e.r}
     return result
 
 
-def _post(path, data, headers):
-    r = requests.post(BASE_URL + '/' + path, json=data, headers=headers)
-    if r.status_code == 200:
+def _post(path, data, headers, params):
+    r = requests.post(BASE_URL + '/' + path, json=data,
+                      headers=headers, params=params)
+    if r.status_code == 200 and not (isinstance(r.json(), dict) and r.json().get('error')):
         return r
     else:
         raise RequestError(path, r)
 
 
-def get(path, data={}, headers={}):
+def get(path, data={}, headers={}, params={}):
     result = None
     try:
-        result = _get(path, data, headers)
+        result = _get(path, data, headers, params).json()
     except RequestError as e:
-        result = {'error': e.message, 'request': e.request}
+        result = {'error': e.message, 'responce': e.r}
     return result
 
 
-def _get(path, data, headers):
-    r = requests.get(BASE_URL + '/' + path, json=data, headers=headers)
-    if r.status_code == 200:
+def _get(path, data, headers, params):
+    r = requests.get(BASE_URL + '/' + path, json=data,
+                     headers=headers, params=params)
+    if r.status_code == 200 and not (isinstance(r.json(), dict) and r.json().get('error')):
         return r
     else:
         raise RequestError(path, r)
 
 
-def put(path, data={}, headers={}):
+def put(path, data={}, headers={}, params={}):
     result = None
     try:
-        result = _put(path, data, headers)
+        result = _put(path, data, headers, params).json()
     except RequestError as e:
-        result = {'error': e.message, 'request': e.request}
+        result = {'error': e.message, 'responce': e.r}
     return result
 
 
-def _put(path, data, headers):
-    r = requests.put(BASE_URL + '/' + path, json=data, headers=headers)
-    if r.status_code == 200:
+def _put(path, data, headers, params):
+    r = requests.put(BASE_URL + '/' + path, json=data,
+                     headers=headers, params=params)
+    if r.status_code == 200 and not (isinstance(r.json(), dict) and r.json().get('error')):
         return r
     else:
         raise RequestError(path, r)
@@ -59,13 +61,13 @@ def _put(path, data, headers):
 def login(client):
     path = 'login/'
     data = client.login_data
-    return get(path, data)
+    return post(path, data)
 
 
 def needed_relogin(r, client):
-    if r.get('error'):
+    if isinstance(r, dict) and r.get('error'):
         print(r['error'])
-        if r['request'].status_code == 401:
+        if r['responce'].status_code == 401:
             if not relogin(client):
                 print('Can not login to server')
                 return True
@@ -86,7 +88,7 @@ def relogin(client):
 
 
 class RequestError(Exception):
-    def __init__(self, path, request):
-        super().__init__(message)
-        self.message = f'Error with request to {BASE_URL + path} with {request.json()["error"]["text"]}'
-        self.request = request
+    def __init__(self, path, r):
+        self.message = f'Error with request to {BASE_URL + "/" + path} with {r.json()["errorText"] if r.text else r.reason}'
+        super().__init__(self.message)
+        self.r = r

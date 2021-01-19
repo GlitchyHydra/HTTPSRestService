@@ -1,23 +1,30 @@
-import client.src.customer as cust
-import client.src.freelancer as free
-import client.src.data as d
-from client.src.utilz import login
+import customer as cust
+import freelancer as free
+import data as d
+from utilz import login
 
 
 def main():
     print('Please login')
     client = d.Client()
     while True:
-        while not (login := input('login: ')):
-            client.login = login
-        while not (password := input('password: ')):
-            client.passowrd = password
+        while True:
+            login_inp = input('login: ')
+            if login_inp:
+                client.login = login_inp
+                break
+
+        while True:
+            password_inp = input('password: ')
+            if password_inp:
+                client.password = password_inp
+                break
 
         r = login(client)
         if not r.get('error'):
             client.token = r['token']
             client.role = r['role']
-            print('Logined successfuly')
+            print(f'Login successfully like {client.role}')
             break
         else:
             print(r['error'])
@@ -29,5 +36,5 @@ def main():
 
     print('Goodbye')
 
+
 main()
-    
