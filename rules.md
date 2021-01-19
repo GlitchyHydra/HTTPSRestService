@@ -64,6 +64,25 @@ OK: HTTP 200
 
 ERROR: HTTP 400, 401
 
+### Просмотр своих работ
+#### Request:
+##### GET `/works/`
+
+#### Response:
+OK: HTTP 200
+
+```json
+[{
+    "id": int,
+    "order_id": int,
+    "freelancer_id" : int,
+    "status": "Open" / "Rejected" / "Accepted",
+    work_date : str
+}, ...]
+```
+
+ERROR: HTTP 400, 401
+
 ### Добавление заявки на выполнения предложения
 #### Request:
 ##### POST `/orders/<order_id:int>/`
