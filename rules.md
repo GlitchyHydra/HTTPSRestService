@@ -28,7 +28,7 @@ ERROR: HTTP 401
 ## Фрилансер
 ### Просмотр открытых предложений
 #### Request:
-##### GET `/orders/`
+##### GET `/orders/<status=open>`
 
 #### Response:
 OK: HTTP 200
