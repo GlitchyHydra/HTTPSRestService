@@ -10,6 +10,7 @@ namespace UserMiddleware.Interfaces
         /*----------------------------------Insert--------------------------------------*/
         public Task<bool> InsertOrder(int customer_id, OrderModel order_model);
         public Task<bool> InsertApplication(int freelancer_id, int order_id);
+        public Task<bool> InsertWork(int freelancer_id, int order_id);
 
         /*----------------------------------Select--------------------------------------*/
         public Task<List<Order>> GetOrders(int customer_id, OrderStatus status);

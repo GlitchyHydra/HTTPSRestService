@@ -60,7 +60,7 @@ namespace DataLayer.Services
             }
         }
 
-        private async Task<UserRole?> GetRoleById(int user_id)
+        public async Task<UserRole?> GetRoleById(int user_id)
         {
             var freelancer = await context.Freelancers.FirstOrDefaultAsync(f => f.UserId == user_id);
             if (freelancer != null) return UserRole.Freelancer;

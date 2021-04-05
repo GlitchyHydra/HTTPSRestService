@@ -4,9 +4,13 @@ using UserMiddleware.Interfaces;
 using DataLayer.Models.Database;
 using DataLayer.Models.Server;
 using DataLayer.Models.DatabaseModels;
+using System;
 
 namespace HTTPS_WebApiServer.Controllers
 {
+    /// <summary>
+    /// All works from applying to order
+    /// </summary>
     [Route("/works")]
     public class WorksController : Controller
     {
@@ -19,8 +23,32 @@ namespace HTTPS_WebApiServer.Controllers
             user_access_service = uas;
         }
 
-        [HttpPut, Route("/{work_id?}")]
-        public async Task<IActionResult> UpdateWorkStatus(int? work_id, [FromBody] WorkStatus status)
+        /// <summary>
+        /// Status of work
+        /// </summary>
+        [Serializable]
+        public class UpWorkStatus
+        {
+            /// <summary>
+            /// Status
+            /// </summary>
+            /// <example>"processing", "done" or "close"</example>
+            /// <remarks>
+            /// "processing" work in progress
+            /// "done" freelancer have complete work and wait for accepting by customer
+            /// "close" accepted by customer
+            /// </remarks>
+            public string status { get; set; }
+        };
+
+        /// <summary>
+        /// Update work status
+        /// </summary>
+        /// <param name="work_id"></param>
+        /// <param name="up_status"></param>
+        /// <returns></returns>
+        [HttpPut("{work_id:int}")]
+        public async Task<IActionResult> UpdateWorkStatus(int? work_id, [FromBody] UpWorkStatus up_status)
         {
             Microsoft.Extensions.Primitives.StringValues token;
             var find_token_res = Request.Headers.TryGetValue("Authorization", out token);
@@ -32,17 +60,18 @@ namespace HTTPS_WebApiServer.Controllers
                 var authResult = await user_access_service.Authenticate(token, UserActions.UpdateWorkStatus);
                 if (authResult > -1)
                 {
+                    WorkStatus status = (WorkStatus)System.Enum.Parse(typeof(WorkStatus), up_status.status, true);
                     var res = await data_service.UpdateWorkStatus((int)work_id, status);
-                    return res ? Ok("Application to order was accepted") : Ok("Error in work status updating");
+                    return res ? Ok(new { Answer = "Work status updated" }) : Ok(new { Answer = "Error in work status updating" });
                 }
                 else return Unauthorized();
             }
         }
 
-        /*
-         * glitchyhydra.ddns.net/works/ 
-         * return assigned to freelancer works
-         */
+        /// <summary>
+        /// Get all works of authorized freelancer
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetWorks()
         {

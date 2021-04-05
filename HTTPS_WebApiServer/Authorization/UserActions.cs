@@ -23,7 +23,7 @@ namespace DataLayer.Models.DatabaseModels
         UpdateWorkStatus     = 2048, //Customer, Freelancer
 
         //All
-        CustomerActions   = InsertOrder | GetOrders | AcceptApplication | AcceptWork | UpdateOrderStatus | UpdateWorkStatus,
+        CustomerActions   = InsertOrder | GetOrders | GetOpenedOrders | AcceptApplication | AcceptWork | UpdateOrderStatus | UpdateWorkStatus,
         FreelancerActions = InsertApplication | GetOpenedOrders | GetApplications | DoneWork | GetWorks | UpdateWorkStatus
     }
 }

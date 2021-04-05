@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using DataLayer.Models.Database;
 using DataLayer.Models.Server;
 using DataLayer;
 using UserMiddleware.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace UserMiddleware.Services
 {
@@ -26,7 +27,8 @@ namespace UserMiddleware.Services
                 Name = order_model.name,
                 Desc = order_model.desc,
                 CustomerId = customer_id,
-                OrderDate = DateTime.UtcNow
+                OrderDate = DateTime.UtcNow,
+                Status = OrderStatus.Open
             };
             var res = await context.Orders.AddAsync(order);
             context.SaveChanges();
@@ -47,10 +49,24 @@ namespace UserMiddleware.Services
             return res != null;
         }
 
+        public async Task<bool> InsertWork(int freelancer_id, int order_id)
+        {
+            Work work = new Work
+            {
+                OrderId = order_id,
+                Status = WorkStatus.Open,
+                FreelancerId = freelancer_id,
+                WorkDate = DateTime.UtcNow
+            };
+            var res = await context.Works.AddAsync(work);
+            context.SaveChanges();
+            return res != null;
+        }
+
         /*----------------------------------Select--------------------------------------*/
         public async Task<List<Order>> GetOrders(int customer_id, OrderStatus status)
         {
-            return await context.Orders
+            return await context.Orders.Include("Applications")
                 .AsAsyncEnumerable()
                 .Where(o => o.CustomerId == customer_id && o.Status == status)
                 .ToListAsync();
@@ -75,33 +91,39 @@ namespace UserMiddleware.Services
         /*----------------------------------Update--------------------------------------*/
         public async Task<bool> UpdateOrderStatus(int order_id, OrderStatus status)
         {
-            var res = await context.Orders.FirstOrDefaultAsync(o => o.Id == order_id);
+            
+            var res = await context.Orders.AsAsyncEnumerable().FirstOrDefaultAsync(o => o.Id == order_id);
             if (res == null) return false;
             else
             {
                 res.Status = status;
-                context.Orders.Update(res);
-                context.SaveChanges();
+                //context.Entry(res).CurrentValues.SetValues(res);
+                context.Update(res);
+                await context.SaveChangesAsync();
                 return true;
             }
         }
 
         public async Task<bool> UpdateApplicationStatus(int application_id, ApplcationStatus status)
         {
-            var res = await context.Applications.FirstOrDefaultAsync(a => a.Id == application_id);
-            if (res == null) return false;
+            var application = await context.Applications.AsAsyncEnumerable().FirstOrDefaultAsync(a => a.Id == application_id);
+            if (application == null) return false;
             else
             {
-                res.Status = status;
-                context.Applications.Update(res);
+                application.Status = status;
+                context.Applications.Update(application);
                 context.SaveChanges();
+                if (status == ApplcationStatus.Accepted)
+                    await InsertWork(application.FreelancerId, application.OrderId);
                 return true;
             }
         }
 
+        
+
         public async Task<bool> UpdateWorkStatus(int work_id, WorkStatus status)
         {
-            var res = await context.Works.FirstOrDefaultAsync(w => w.Id == work_id);
+            var res = await context.Works.AsAsyncEnumerable().FirstOrDefaultAsync(w => w.Id == work_id);
             if (res == null) return false;
             else
             {

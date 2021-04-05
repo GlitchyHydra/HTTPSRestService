@@ -12,6 +12,10 @@ using LettuceEncrypt;
 using System.IO;
 using UserMiddleware.Interfaces;
 using UserMiddleware.Services;
+using System.Text.Json.Serialization;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+using System;
 
 namespace HTTPS_WebApiServer
 {
@@ -28,7 +32,10 @@ namespace HTTPS_WebApiServer
         {
             services.AddLettuceEncrypt().PersistDataToDirectory(new DirectoryInfo("D:/data/Lettuce/Ecnrypt"), "57247LaLol22"); ;
             //additional
-            services.AddMvc();
+            services.AddMvc().AddJsonOptions(opts =>
+            {
+                opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
             services.AddSession();
             services.AddTransient<IAuthorizationService, AuthorizationService>();
             services.AddTransient<IUserAccessService, UserAccessService>();
@@ -41,6 +48,38 @@ namespace HTTPS_WebApiServer
                 );
 
             services.AddControllersWithViews();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                { 
+                    Title = "Freelancer Rest Service",
+                    Version = "v1"
+                });
+
+                var secScheme = new OpenApiSecurityScheme
+                {
+                    Name = "JWT Auth",
+                    Description = "Pass JWT Bearer token to the Authrozation section of header",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Reference =
+                    {
+                        //Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {secScheme, new string[] { } }
+                });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath, true);
+            });
             //services.AddAuthentication(CookieA)
         }
 
@@ -64,12 +103,21 @@ namespace HTTPS_WebApiServer
             app.UseEndpoints(endpoints =>
             {
 
-                endpoints.MapGet("/", async context =>
+                /*endpoints.MapGet("/", async context =>
                 {
                     await context.Response.WriteAsync("This main page of lab4 HTTPS Service." +
                         " Use /order for Customer and /applications for Freelancer");
-                });
+                });*/
                 endpoints.MapDefaultControllerRoute();
+            });
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                options.RoutePrefix = string.Empty;
+                
             });
         }
     }

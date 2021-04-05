@@ -14,12 +14,12 @@ namespace UserMiddleware.Services
     {
         public static bool IsCustomerAction(UserActions action)
         {
-            return (UserActions.CustomerActions & action) == UserActions.CustomerActions;
+            return (UserActions.CustomerActions & action) != 0;
         }
 
         public static bool IsFreelancerAction(UserActions action)
         {
-            return (UserActions.FreelancerActions & action) == UserActions.FreelancerActions;
+            return (UserActions.FreelancerActions & action) != 0;
         }
     }
 

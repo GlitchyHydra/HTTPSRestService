@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using DataLayer.Models.Database;
-using System;
+using Npgsql;
 
 namespace DataLayer
 {
@@ -10,33 +10,16 @@ namespace DataLayer
         public FreelancerContext(DbContextOptions<FreelancerContext> options)
             : base(options)
         {
-            //Database.EnsureCreated();
+            NpgsqlConnection.GlobalTypeMapper.MapEnum<OrderStatus>("order_status");
+            NpgsqlConnection.GlobalTypeMapper.MapEnum<ApplcationStatus>("application_status");
+            NpgsqlConnection.GlobalTypeMapper.MapEnum<WorkStatus>("work_status");
         }
-
+        
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql("Host=localhost;Database=freelancer_bd;Username=postgres;Password=5690");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //translate to string
-            modelBuilder
-                .Entity<Order>()
-                .Property(e => e.Status)
-                .HasConversion(
-                v => v.ToString(),
-                v => (OrderStatus)Enum.Parse(typeof(OrderStatus), v));
-            modelBuilder
-                .Entity<Application>()
-                .Property(e => e.Status)
-                .HasConversion(
-                v => v.ToString(),
-                v => (ApplcationStatus)Enum.Parse(typeof(ApplcationStatus), v));
-            modelBuilder
-                .Entity<Work>()
-                .Property(e => e.Status)
-                .HasConversion(
-                v => v.ToString(),
-                v => (WorkStatus)Enum.Parse(typeof(WorkStatus), v));
         }
 
         public DbSet<User> Users { get; set; }

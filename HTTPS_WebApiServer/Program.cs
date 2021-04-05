@@ -27,11 +27,11 @@ namespace HTTPS_WebApiServer
                     var appServices = options.ApplicationServices;
                     options.ConfigureHttpsDefaults(h =>
                     {
-                        h.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
-                        h.SslProtocols = SslProtocols.Tls12;
                         h.UseLettuceEncrypt(appServices);
+                        //h.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+                        h.SslProtocols = SslProtocols.Tls12;
                     });
-                    options.Listen(IPAddress.Parse("192.168.0.200"), 443, listenOptions =>
+                    options.Listen(IPAddress.Parse("127.0.0.1"), 8003, listenOptions =>
                     {
                         var appServices = options.ApplicationServices;
                         listenOptions.UseHttps(h =>
@@ -39,14 +39,14 @@ namespace HTTPS_WebApiServer
                             h.UseLettuceEncrypt(appServices);
                         });
                     });
-                    options.Listen(IPAddress.Parse("192.168.0.200"), 80, listenOptions =>
+                    options.Listen(IPAddress.Parse("127.0.0.1"), 8002, listenOptions =>
                     {
                     });
                 })
                 .UseConfiguration(config)
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseStartup<Startup>()
-                .UseUrls("https://glitchyhydra.ddns.net:443", "http://glitchyhydra.ddns.net:80")
+                .UseUrls("https://hydra14.duckdns.org:8003", "http://hydra14.duckdns.org:8002")
                 .Build()
                 .Run();
         }

@@ -10,5 +10,6 @@ namespace UserMiddleware.Interfaces
     {
         public Task<int> Authenthicate(LoginModel model);
         public Task<string> Authorize(int user_id);
+        public Task<UserRole?> GetRoleById(int user_id);
     }
 }

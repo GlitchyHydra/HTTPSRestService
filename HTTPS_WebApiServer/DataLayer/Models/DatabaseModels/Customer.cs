@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataLayer.Models.Database
 {
+    [Table("customers")]
     public class Customer
     {
         [Column("id")]
