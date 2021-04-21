@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace DataLayer.Models.Database
+namespace FreelancerWeb.DataLayer.Models.Database
 {
     
     public enum OrderStatus

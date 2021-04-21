@@ -7,13 +7,16 @@ using System.IO;
 using System.Net;
 using System.Security.Authentication;
 
-namespace HTTPS_WebApiServer
+namespace FreelancerWeb
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-             var config = new ConfigurationBuilder()
+            var HttpPort = 8002;
+            var HttpsPort = 8003;
+
+            var config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddEnvironmentVariables()
             .AddJsonFile("certificate.json", optional: true, reloadOnChange: true)
@@ -25,13 +28,18 @@ namespace HTTPS_WebApiServer
                 .UseKestrel(options =>
                 {
                     var appServices = options.ApplicationServices;
+
                     options.ConfigureHttpsDefaults(h =>
                     {
                         h.UseLettuceEncrypt(appServices);
                         //h.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
                         h.SslProtocols = SslProtocols.Tls12;
                     });
-                    options.Listen(IPAddress.Parse("127.0.0.1"), 8003, listenOptions =>
+                    options.ListenAnyIP(HttpPort, listenOptions =>
+                    {
+
+                    });
+                    options.ListenAnyIP(HttpsPort, listenOptions =>
                     {
                         var appServices = options.ApplicationServices;
                         listenOptions.UseHttps(h =>
@@ -39,14 +47,23 @@ namespace HTTPS_WebApiServer
                             h.UseLettuceEncrypt(appServices);
                         });
                     });
-                    options.Listen(IPAddress.Parse("127.0.0.1"), 8002, listenOptions =>
+                    /*
+                    options.Listen(IPAddress.Parse(Ip), HttpsPort, listenOptions =>
                     {
+                        var appServices = options.ApplicationServices;
+                        listenOptions.UseHttps(h =>
+                        {
+                            h.UseLettuceEncrypt(appServices);
+                        });
                     });
+                    options.Listen(IPAddress.Parse(Ip), HttpPort, listenOptions =>
+                    {
+                    });*/
                 })
                 .UseConfiguration(config)
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseStartup<Startup>()
-                .UseUrls("https://hydra14.duckdns.org:8003", "http://hydra14.duckdns.org:8002")
+                .UseUrls("http://hydra14.duckdns.org:8002", "https://hydra14.duckdns.org:8003")
                 .Build()
                 .Run();
         }

@@ -1,22 +1,20 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using UserMiddleware.Interfaces;
-using DataLayer.Models.Database;
-using DataLayer.Models.DatabaseModels;
-using DataLayer.Models.Server;
+using FreelancerWeb.DataLayer.Models.Database;
+using FreelancerWeb.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
-namespace HTTPS_WebApiServer.Controllers
+namespace FreelancerWeb.Controllers
 {
     [Route("/applications")]
-    public class ApplicationsController : Controller
+    public class ApplicationsController : BaseController
     {
         private readonly IUserDataService data_service;
-        private readonly IUserAccessService user_access_service;
 
-        public ApplicationsController(IUserDataService serv, IUserAccessService uas)
+        public ApplicationsController(IUserDataService serv)
         {
             data_service = serv;
-            user_access_service  = uas;
         }
 
         /*------------------------------------------Only Customer----------------------------------------------*/
@@ -29,21 +27,14 @@ namespace HTTPS_WebApiServer.Controllers
         /// <response code="200">result of updating</response>
         /// <response code="400">Lack of token in header</response>
         [HttpPut("{application_id:int}")]
+        [Authorize(Roles = WebRoles.Customer)]
         public async Task<IActionResult> AcceptApplication(int application_id)
         {
-            Microsoft.Extensions.Primitives.StringValues token;
-            var find_token_res = Request.Headers.TryGetValue("Authorization", out token);
-            if (!find_token_res) return Unauthorized("Lack of token");
-            else
-            {
-                var authResult = await user_access_service.Authenticate(token, UserActions.AcceptApplication);
-                if (authResult > -1)
-                {
-                    var res = await data_service.UpdateApplicationStatus((int)application_id, ApplcationStatus.Accepted);
-                    return res ? Ok(new { Answer = "Application to order was accepted" }) : Ok(new { Answer = "Error in work status updating" });
-                }
-                else return Unauthorized();
-            }
+            int customerId = Id;
+            if (customerId == NotAuthroized)
+                return Unauthorized();
+            var res = await data_service.UpdateApplicationStatus((int)application_id, ApplcationStatus.Accepted);
+            return res ? Ok(new { Answer = "Application to order was accepted" }) : Ok(new { Answer = "Error in work status updating" });
         }
 
         /*------------------------------------------Only Freelancer----------------------------------------------*/
@@ -55,21 +46,14 @@ namespace HTTPS_WebApiServer.Controllers
         /// <response code="200">Applications by the freelancer</response>
         /// <response code="400">Lack of token in header</response>
         [HttpGet]
+        [Authorize(Roles = WebRoles.Freelancer)]
         public async Task<IActionResult> GetApplications()
         {
-            Microsoft.Extensions.Primitives.StringValues token;
-            var find_token_res = Request.Headers.TryGetValue("Authorization", out token);
-            if (!find_token_res) return Unauthorized("Lack of token");
-            else
-            {
-                var user_id = await user_access_service.Authenticate(token, UserActions.GetApplications);
-                if (user_id > -1)
-                {
-                    var applications = await data_service.GetApplications(user_id);
-                    return Ok(applications);
-                }
-                else return Unauthorized("Invalid token");
-            }
+            var freelancer_id = Id;
+            if (freelancer_id > -1)
+                return Unauthorized(TokenInvalidAnswer);
+            var applications = await data_service.GetApplications(freelancer_id);
+            return Ok(applications);
         }
 
     }

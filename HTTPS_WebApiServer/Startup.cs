@@ -4,10 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using DataLayer;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using DataLayer.Services;
-using Microsoft.AspNetCore.Http;
 using LettuceEncrypt;
 using System.IO;
 using UserMiddleware.Interfaces;
@@ -16,8 +14,10 @@ using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System;
+using FreelancerWeb.Authentication;
+using FreelancerWeb.Authorization;
 
-namespace HTTPS_WebApiServer
+namespace FreelancerWeb
 {
     public class Startup
     {
@@ -37,10 +37,22 @@ namespace HTTPS_WebApiServer
                 opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
             services.AddSession();
+
+            //Add Auth middleware
+            services.AddAuthentication()
+                .AddFreelancerAuth<UserAccessService>(options =>
+                {
+                    options.Realm = "Freelancer App";
+                    options.ForwardAuthenticate = FreelancerAuthDefaults.AuthenticationScheme;
+                });
+            services.AddAuthorization(options =>
+            {
+            });
+
             services.AddTransient<IAuthorizationService, AuthorizationService>();
-            services.AddTransient<IUserAccessService, UserAccessService>();
             services.AddTransient<IUserDataService, UserDataService>();
             services.AddMemoryCache();
+
             //Db connection
             var sqlConnectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<FreelancerContext>(OptionsBuilder
@@ -56,19 +68,21 @@ namespace HTTPS_WebApiServer
                     Version = "v1"
                 });
 
+                var reference = new OpenApiReference
+                {
+                    Id = FreelancerAuthDefaults.AuthenticationScheme,
+                    Type = ReferenceType.SecurityScheme
+                };
+
                 var secScheme = new OpenApiSecurityScheme
                 {
                     Name = "JWT Auth",
                     Description = "Pass JWT Bearer token to the Authrozation section of header",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
+                    Scheme = "Bearer",
                     BearerFormat = "JWT",
-                    Reference =
-                    {
-                        //Id = JwtBearerDefaults.AuthenticationScheme,
-                        Type = ReferenceType.SecurityScheme
-                    }
+                    Reference = reference
                 };
 
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -80,7 +94,6 @@ namespace HTTPS_WebApiServer
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath, true);
             });
-            //services.AddAuthentication(CookieA)
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -96,8 +109,10 @@ namespace HTTPS_WebApiServer
 
             //add endpoint resolution middlware
             app.UseRouting();
+
             //security
-            //app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             /*-------------------------END ROUTING ZONE---------------------------*/
             app.UseEndpoints(endpoints =>
@@ -116,8 +131,7 @@ namespace HTTPS_WebApiServer
             app.UseSwaggerUI(options =>
             {
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-                options.RoutePrefix = string.Empty;
-                
+                options.RoutePrefix = string.Empty;// "/swagger";
             });
         }
     }

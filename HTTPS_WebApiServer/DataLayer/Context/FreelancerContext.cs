@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using DataLayer.Models.Database;
+﻿using Microsoft.EntityFrameworkCore;
+using FreelancerWeb.DataLayer.Models.Database;
 using Npgsql;
 
 namespace DataLayer

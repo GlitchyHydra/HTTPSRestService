@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using DataLayer.Models.Server;
+﻿using System.Threading.Tasks;
+using FreelancerWeb.Authorization;
+using FreelancerWeb.DataLayer.Models.Server;
 
 namespace UserMiddleware.Interfaces
 {
@@ -10,6 +8,6 @@ namespace UserMiddleware.Interfaces
     {
         public Task<int> Authenthicate(LoginModel model);
         public Task<string> Authorize(int user_id);
-        public Task<UserRole?> GetRoleById(int user_id);
+        public Task<UserRole> GetRoleById(int user_id);
     }
 }

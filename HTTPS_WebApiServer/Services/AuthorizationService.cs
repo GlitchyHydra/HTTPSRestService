@@ -3,11 +3,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 using UserMiddleware.Interfaces;
-using DataLayer.Models.Server;
+using FreelancerWeb.DataLayer.Models.Server;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System;
+using FreelancerWeb.Authorization;
 
 namespace DataLayer.Services
 {
@@ -60,7 +61,7 @@ namespace DataLayer.Services
             }
         }
 
-        public async Task<UserRole?> GetRoleById(int user_id)
+        public async Task<UserRole> GetRoleById(int user_id)
         {
             var freelancer = await context.Freelancers.FirstOrDefaultAsync(f => f.UserId == user_id);
             if (freelancer != null) return UserRole.Freelancer;
@@ -68,7 +69,7 @@ namespace DataLayer.Services
             var customer = await context.Customers.FirstOrDefaultAsync(c => c.UserId == user_id);
             if (customer != null) return UserRole.Customer;
 
-            return null;
+            return UserRole.None;
         }
 
         private async Task<string> GenerateJwtToken(int user_id)

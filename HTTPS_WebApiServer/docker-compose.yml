@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres
+    networks:
+     - freelancer-web-network
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: '5690'
+      POSTGRES_DB: freelancer_db
+  web:
+    container_name: asp
+    image: glitchyhydra/freelancer_web
+    build:
+      context: .
+      dockerfile: asp.dockerfile
+    volumes:
+     - .:/user/src/app/
+    ports:
+     - "8002:8002"
+     - "8003:8003"
+    depends_on:
+     - db
+    networks:
+     - freelancer-web-network
+    command: ["./wait-for-it.sh", "db:5432", "--", "dotnet", "FreelancerWeb.dll"]
+    
+networks:
+  freelancer-web-network:
+    driver: bridge

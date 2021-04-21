@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DataLayer.Models.Database;
-using DataLayer.Models.Server;
+using FreelancerWeb.DataLayer.Models.Database;
+using FreelancerWeb.DataLayer.Models.Server;
 using DataLayer;
 using UserMiddleware.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -24,8 +24,8 @@ namespace UserMiddleware.Services
         {
             Order order = new Order
             {
-                Name = order_model.name,
-                Desc = order_model.desc,
+                Name = order_model.Name,
+                Desc = order_model.Desc,
                 CustomerId = customer_id,
                 OrderDate = DateTime.UtcNow,
                 Status = OrderStatus.Open
@@ -118,8 +118,6 @@ namespace UserMiddleware.Services
                 return true;
             }
         }
-
-        
 
         public async Task<bool> UpdateWorkStatus(int work_id, WorkStatus status)
         {

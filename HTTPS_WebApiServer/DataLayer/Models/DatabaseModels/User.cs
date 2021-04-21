@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataLayer.Models.Database
+namespace FreelancerWeb.DataLayer.Models.Database
 {
     /*
     * Table name: users

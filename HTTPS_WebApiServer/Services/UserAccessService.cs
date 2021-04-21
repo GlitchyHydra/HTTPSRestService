@@ -1,52 +1,22 @@
-﻿using DataLayer.Models.Server;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UserMiddleware.Interfaces;
 using DataLayer;
-using DataLayer.Models.DatabaseModels;
 using System.Threading.Tasks;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using FreelancerWeb.Authorization;
 
 namespace UserMiddleware.Services
 {
-    static class UserActionManager
-    {
-        public static bool IsCustomerAction(UserActions action)
-        {
-            return (UserActions.CustomerActions & action) != 0;
-        }
-
-        public static bool IsFreelancerAction(UserActions action)
-        {
-            return (UserActions.FreelancerActions & action) != 0;
-        }
-    }
-
     public class UserAccessService : IUserAccessService
     {
-        
         private readonly FreelancerContext context;
-
-        /*
-         * { UserRole.Customer, new HashSet<string>() { "GetOpenedOrders", "GetOwnedApplications", "ApplyToOrder", "DoneWork" } },
-            { UserRole.Freelancer, new HashSet<string>() {"InsertOrder", "GetOwnedOrders", "AlterOrderStatus"} }
-         */
 
         public UserAccessService(FreelancerContext ctx)
         {
             context = ctx;
-        }
-
-        //return true if user has a proper role
-        private bool IsAuthorized(UserRole role, UserActions action)
-        {
-            return role switch
-            {
-                UserRole.Customer   => UserActionManager.IsCustomerAction(action),
-                UserRole.Freelancer => UserActionManager.IsFreelancerAction(action),
-                _                   => false,
-            };
         }
 
         private bool IsTokenExpired(string token)
@@ -76,39 +46,49 @@ namespace UserMiddleware.Services
         }
 
         //return user id if success or -1
-        public async Task<int> Authenticate(string token, UserActions action)
+        public async Task<IList<Claim>> Authenticate(string token)
         {
+            IList<Claim> claims = new List<Claim>();
+
             if (IsTokenExpired(token))
-                return (int)UserAccessError.Expired;
+            {
+                claims.Add(new Claim(ClaimTypes.Expired, "Expired"));
+                claims.Add(new Claim(ClaimTypes.Authentication, "Invalid"));
+                return claims;
+            }
+                
 
             var role = GetRoleByToken(token);
-            var isAuthorizedTo = IsAuthorized(role, action);
-            if (!isAuthorizedTo)
-                return (int)UserAccessError.NotAuthorized;
-
             var user_id = GetIdByToken(token);
             var user = await context.Users.FirstOrDefaultAsync(u => u.Id == user_id);
-            if (user is null) return (int)UserAccessError.Invalid;
-            else
+            if (user is null || user.Token != token)
             {
-                if (user.Token != token)
-                    return (int)UserAccessError.Invalid;
-
-                switch (role)
-                {
-                    case UserRole.Customer:
-                        {
-                            var res = await context.Customers.FirstOrDefaultAsync(c => c.UserId == user.Id);
-                            return res.Id;
-                        }
-                    case UserRole.Freelancer:
-                        {
-                            var res = await context.Freelancers.FirstOrDefaultAsync(f => f.UserId == user.Id);
-                            return res.Id;
-                        }
-                }
-                return (int)UserAccessError.Invalid;
+                claims.Add(new Claim(ClaimTypes.Expired, "Expired"));
+                claims.Add(new Claim(ClaimTypes.Authentication, "Invalid"));
+                return claims;
             }
+
+            int id = 0;
+            switch (role)
+            {
+                case UserRole.Customer:
+                    {
+                        var res = await context.Customers.FirstOrDefaultAsync(c => c.UserId == user.Id);
+                        id = res.Id;
+                        claims.Add(new Claim(ClaimTypes.Role, UserRole.Customer.ToString()));
+                        break;
+                    }
+                case UserRole.Freelancer:
+                    {
+                        var res = await context.Freelancers.FirstOrDefaultAsync(f => f.UserId == user.Id);
+                        id = res.Id;
+                        claims.Add(new Claim(ClaimTypes.Role, UserRole.Freelancer.ToString()));
+                        break;
+                    }
+            }
+            claims.Add(new Claim("Id", id.ToString()));
+            return claims;
+
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿using DataLayer.Models.Server;
-using DataLayer.Models.DatabaseModels;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace UserMiddleware.Interfaces
 {
@@ -13,7 +13,7 @@ namespace UserMiddleware.Interfaces
 
     public interface IUserAccessService
     {
-        public Task<int> Authenticate(string token, UserActions action);
+        public Task<IList<Claim>> Authenticate(string token);
 
     }
 }

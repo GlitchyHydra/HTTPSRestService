@@ -1,26 +1,26 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using UserMiddleware.Interfaces;
-using DataLayer.Models.Database;
-using DataLayer.Models.Server;
-using DataLayer.Models.DatabaseModels;
+using FreelancerWeb.DataLayer.Models.Database;
+using FreelancerWeb.DataLayer.Models.Server;
 using System;
+using Microsoft.AspNetCore.Authorization;
+using FreelancerWeb.Authorization;
+using System.Linq;
 
-namespace HTTPS_WebApiServer.Controllers
+namespace FreelancerWeb.Controllers
 {
     /// <summary>
     /// For orders managing
     /// </summary>
     [Controller, Route("/orders")]
-    public class OrdersController : Controller
+    public class OrdersController : BaseController
     {
         private readonly IUserDataService orders_service;
-        private readonly IUserAccessService user_access_service;
 
-        public OrdersController(IUserDataService serv, IUserAccessService uas)
+        public OrdersController(IUserDataService serv)
         {
             orders_service = serv;
-            user_access_service = uas;
         }
 
         /// <summary>
@@ -31,21 +31,15 @@ namespace HTTPS_WebApiServer.Controllers
         /// <response code="200">string answer of inserting result</response>
         /// <response code="401">lack of token in header</response>
         [HttpPost("{order_id:int}")]
+        [Authorize(Roles = WebRoles.Freelancer)]
         public async Task<IActionResult> InsertApplication(int order_id)
         {
-            Microsoft.Extensions.Primitives.StringValues token;
-            var find_token_res = Request.Headers.TryGetValue("Authorization", out token);
-            if (!find_token_res) return Unauthorized(new { erorrText = "Lack of token" });
-            else
-            {
-                var freelancer_id = await user_access_service.Authenticate(token, UserActions.InsertApplication);
-                if (freelancer_id > -1)
-                {
-                    var res = await orders_service.InsertApplication(freelancer_id, order_id);
-                    return res ? Ok(new { Answer = "You succesfully applied to order" }) : Ok(new { Answer = "Error in application inserting" });
-                }
-                else return Unauthorized(new { errorText = "Invalid token" });
-            }
+            var freelancerId = Id;
+            if (freelancerId == NotAuthroized)
+                return Unauthorized(new { errorText = TokenInvalidAnswer });
+            var res = await orders_service.InsertApplication(freelancerId, order_id);
+            return res ? Ok(new { Answer = "You succesfully applied to order" })
+                : Ok(new { Answer = "Error in application inserting" });
         }
 
         /// <summary>
@@ -56,21 +50,15 @@ namespace HTTPS_WebApiServer.Controllers
         /// <response code="200">string answer of inserting result</response>
         /// <response code="401">lack of token in header</response>
         [HttpPost]
+        [Authorize(Roles = WebRoles.Customer)]
         public async Task<IActionResult> InsertOrder([FromBody] OrderModel model)
         {
-            Microsoft.Extensions.Primitives.StringValues token;
-            var find_token_res = Request.Headers.TryGetValue("Authorization", out token);
-            //check if all data present
             if (model is null) return BadRequest("Lack of order name");
-            else if (!find_token_res) return Unauthorized(new { erorrText = "Lack of token" });
-            //get id and check user data
-            var authResult = await user_access_service.Authenticate(token, UserActions.InsertOrder);
-            if (authResult > -1)
-            {
-                var res = await orders_service.InsertOrder(authResult, model);
-                return res ? Ok(new { Answer = "Order inserted" }) : Ok(new { Answer = "Error in order inserting" });
-            }
-            else return Unauthorized(new { errorText = "Invalid token" });
+            var customerId = Id;
+            if (customerId == NotAuthroized)
+                return Unauthorized(new { errorText = "Invalid token" });
+            var res = await orders_service.InsertOrder(customerId, model);
+            return res ? Ok(new { Answer = "Order inserted" }) : Ok(new { Answer = "Error in order inserting" });
         }
 
         /// <summary>
@@ -83,54 +71,24 @@ namespace HTTPS_WebApiServer.Controllers
         /// <response code="200">orders</response>
         /// <response code="401">lack of token in header</response>
         [HttpGet("{status?}")]
+        [Authorize()]
         public async Task<IActionResult> GetOrders(string status)
         {
-            Microsoft.Extensions.Primitives.StringValues token;
-            var find_token_res = Request.Headers.TryGetValue("Authorization", out token);
-            if (!find_token_res) return Unauthorized(new { erorrText = "Lack of token" });
-            //if model not present it is a freelancer request
-            //other way it is customer
-
-            OrderStatus order_status;
-            UserActions user_action;
-            if (status == "open")
-            {
-                order_status = OrderStatus.Open;
-                user_action = UserActions.GetOpenedOrders;
-            }
-            else
-            {
-                if (status == "processing")
-                {
-                    order_status = OrderStatus.Processing;
-                }
-                else
-                {
-                    order_status = OrderStatus.Close;
-                }
-
-                user_action = UserActions.GetOrders;
-            }
-            //user verification
-            var authResult = await user_access_service.Authenticate(token, user_action);
-            if (authResult > -1)
-            {
-                var res = await orders_service.GetOrders(authResult, order_status);
-                return Ok(res);
-            }
-            else return Unauthorized(new { errorText = "Invalid token" });
+            OrderStatus order_status = Enum.GetNames(typeof(OrderStatus)).Contains(status) 
+                ? (OrderStatus)Enum.Parse(typeof(OrderStatus), status, true)
+                : OrderStatus.Open;
+            UserActions user_action; 
+            if (order_status == OrderStatus.Open) user_action = UserActions.GetOpenedOrders;
+            else user_action = UserActions.GetOrders;
+            UserRole role = GetRole();
+            if (!UserActionManager.IsAuthorized(role, user_action))
+                return Unauthorized(new { errorText = TokenInvalidAnswer });
+            var user_id = Id;
+            if (Id == NotAuthroized)
+                return Unauthorized(new { errorText = TokenInvalidAnswer });
+            var res = await orders_service.GetOrders(user_id, order_status);
+            return Ok(res);
         }
-
-        /// <summary>
-        /// Order status:
-        /// "open", "processing", "close"
-        /// </summary>
-        /// <example>open</example>
-        [Serializable]
-        public class UpOrdStat 
-        {
-            public string status { get; set; }
-        };
 
         /// <summary>
         /// update the status of the order
@@ -141,23 +99,18 @@ namespace HTTPS_WebApiServer.Controllers
         /// <response code="200">string answer of updating result</response>
         /// <response code="401">lack of token in header</response>
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] UpOrdStat up_status)
+        [Authorize(Roles = WebRoles.Customer)]
+        public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] StatusUpdateModel up_status)
         {
-            Microsoft.Extensions.Primitives.StringValues token;
-            var find_token_res = Request.Headers.TryGetValue("Authorization", out token);  
-            if (!find_token_res) return Unauthorized(new { erorrText = "Lack of token" });
             if (up_status is null) return BadRequest(new { errorText = "Order status required" });
-            else
-            {
-                var authResult = await user_access_service.Authenticate(token, UserActions.UpdateOrderStatus);
-                if (authResult > -1)
-                {
-                    OrderStatus order_status = (OrderStatus)System.Enum.Parse(typeof(OrderStatus), up_status.status, true);
-                    var res = await orders_service.UpdateOrderStatus((int)id, order_status);
-                    return res ? Ok(new { Answer = "Updated Sucessfully" }) : Ok(new { Answer = "Error in order status updating" });
-                }
-                else return Unauthorized(new { errorText = "Invalid token" });
-            }
+            var customerId = Id;
+            if (customerId == NotAuthroized)
+                return Unauthorized(new { errorText = TokenInvalidAnswer });
+            OrderStatus order_status = (OrderStatus)System.Enum.Parse(typeof(OrderStatus), up_status.status, true);
+            var res = await orders_service.UpdateOrderStatus((int)id, order_status);
+            return res 
+                ? Ok(new { Answer = "Updated Sucessfully" })
+                : Ok(new { Answer = "Error in order status updating" });
         }
     }
 }

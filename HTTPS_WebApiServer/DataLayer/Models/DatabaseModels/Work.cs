@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataLayer.Models.Database
+namespace FreelancerWeb.DataLayer.Models.Database
 {
     public enum WorkStatus
     {

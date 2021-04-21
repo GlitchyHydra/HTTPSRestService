@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using DataLayer.Models.Database;
-using DataLayer.Models.Server;
+using FreelancerWeb.DataLayer.Models.Database;
+using FreelancerWeb.DataLayer.Models.Server;
 
 namespace UserMiddleware.Interfaces
 {

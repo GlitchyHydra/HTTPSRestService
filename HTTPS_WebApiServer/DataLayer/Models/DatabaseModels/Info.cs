@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataLayer.Models.Database
+namespace FreelancerWeb.DataLayer.Models.Database
 {
     [Table("info")]
     public class Info
