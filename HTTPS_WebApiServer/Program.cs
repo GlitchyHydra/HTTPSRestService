@@ -15,6 +15,9 @@ namespace FreelancerWeb
         {
             var HttpPort = 8002;
             var HttpsPort = 8003;
+            var domainName = "hydra14.duckdns.org";
+            var urlHttp = String.Format("http://{0}:{1}", domainName, HttpPort.ToString());
+            var urlHttps = String.Format("http://{0}:{1}", domainName, HttpsPort.ToString());
 
             var config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
@@ -47,23 +50,11 @@ namespace FreelancerWeb
                             h.UseLettuceEncrypt(appServices);
                         });
                     });
-                    /*
-                    options.Listen(IPAddress.Parse(Ip), HttpsPort, listenOptions =>
-                    {
-                        var appServices = options.ApplicationServices;
-                        listenOptions.UseHttps(h =>
-                        {
-                            h.UseLettuceEncrypt(appServices);
-                        });
-                    });
-                    options.Listen(IPAddress.Parse(Ip), HttpPort, listenOptions =>
-                    {
-                    });*/
                 })
                 .UseConfiguration(config)
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseStartup<Startup>()
-                .UseUrls("http://hydra14.duckdns.org:8002", "https://hydra14.duckdns.org:8003")
+                .UseUrls(urlHttp, urlHttps)
                 .Build()
                 .Run();
         }

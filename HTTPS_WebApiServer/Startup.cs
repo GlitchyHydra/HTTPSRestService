@@ -30,6 +30,10 @@ namespace FreelancerWeb
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpsRedirection(options =>
+            {
+                options.HttpsPort = 8003;
+            });
             services.AddLettuceEncrypt().PersistDataToDirectory(new DirectoryInfo("D:/data/Lettuce/Ecnrypt"), "57247LaLol22"); ;
             //additional
             services.AddMvc().AddJsonOptions(opts =>
