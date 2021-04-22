@@ -17,6 +17,8 @@ FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
 WORKDIR /app
 EXPOSE 8002
 EXPOSE 8003
+ENV ASPNETCORE_ENVIRONMENT Production
+ENV ASPNETCORE_URLS=http://*:8002,https://*:8003
 COPY --from=build-env /app ./
 ENTRYPOINT ["dotnet", "FreelancerWeb.dll"]
 
