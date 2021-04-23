@@ -4,12 +4,14 @@ using Newtonsoft.Json;
 namespace FreelancerWeb.DataLayer.Models.Server
 {
     /// <summary>
-    /// 
+    /// Response from server to PUT and POST requests
     /// </summary>
     [JsonObject, Serializable]
-    public class Response
+    public class FreelancerResponse
     {
-        public string Status { get; set; }
+        /// <summary>
+        /// Description of reponse result
+        /// </summary>
         public string Message { get; set; }
     }
 }

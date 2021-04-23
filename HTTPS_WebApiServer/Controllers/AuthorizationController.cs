@@ -35,11 +35,14 @@ namespace FreelancerWeb.Controllers
         /// <response code="200">Returns newly created token</response>
         /// <response code="401">Error in login or password</response>
         [HttpPost("/login")]
+        [System.Web.Http.AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            if (model is null) return Unauthorized(new { errorText = "Invalid username or password" });
+            if (model is null)
+                return Unauthorized(new FreelancerResponse{ Message = "Invalid username or password" });
             var user_id = await authorization_service.Authenthicate(model);
-            if (user_id == -1) return Unauthorized(new { errorText = "Invalid username or password" });
+            if (user_id == -1)
+                return Unauthorized(new FreelancerResponse{ Message = "Invalid username or password" });
             else
             {
                 var token = await authorization_service.Authorize(user_id);

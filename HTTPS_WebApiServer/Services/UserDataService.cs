@@ -64,7 +64,15 @@ namespace UserMiddleware.Services
         }
 
         /*----------------------------------Select--------------------------------------*/
-        public async Task<List<Order>> GetOrders(int customer_id, OrderStatus status)
+        public async Task<List<Order>> GetOrders(OrderStatus status)
+        {
+            return await context.Orders.Include("Applications")
+                .AsAsyncEnumerable()
+                .Where(o => o.Status == status)
+                .ToListAsync();
+        }
+
+        public async Task<List<Order>> GetOrdersByCustomerId(int customer_id, OrderStatus status)
         {
             return await context.Orders.Include("Applications")
                 .AsAsyncEnumerable()

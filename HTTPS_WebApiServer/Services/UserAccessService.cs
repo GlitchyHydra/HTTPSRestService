@@ -50,6 +50,10 @@ namespace UserMiddleware.Services
         {
             IList<Claim> claims = new List<Claim>();
 
+            bool canBeRead = new JwtSecurityTokenHandler().CanReadToken(token);
+            if (!canBeRead)
+                return claims;
+
             if (IsTokenExpired(token))
             {
                 claims.Add(new Claim(ClaimTypes.Expired, "Expired"));
@@ -57,7 +61,6 @@ namespace UserMiddleware.Services
                 return claims;
             }
                 
-
             var role = GetRoleByToken(token);
             var user_id = GetIdByToken(token);
             var user = await context.Users.FirstOrDefaultAsync(u => u.Id == user_id);

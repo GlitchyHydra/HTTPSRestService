@@ -15,7 +15,6 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System;
 using FreelancerWeb.Authentication;
-using FreelancerWeb.Authorization;
 
 namespace FreelancerWeb
 {
@@ -30,11 +29,21 @@ namespace FreelancerWeb
 
         public void ConfigureServices(IServiceCollection services)
         {
-            /*services.AddHttpsRedirection(options =>
+            services.AddHttpsRedirection(options =>
             {
                 options.HttpsPort = 443;
-            });*/
-            services.AddLettuceEncrypt().PersistDataToDirectory(new DirectoryInfo("/app"), "57247LaLol22"); ;
+            });
+            
+            services.AddLettuceEncrypt(c =>
+            {
+                // Set domain names
+                c.DomainNames = new[] { "hydra14.duckdns.org" };
+                // Email to use as the contact
+                c.EmailAddress = "glitchyhydra97@gmail.com";
+                // Auto accept LetsEncrypt terms
+                c.AcceptTermsOfService = true;
+            }).PersistDataToDirectory(new DirectoryInfo(Directory.GetCurrentDirectory()), "57247LaLol22"); ;
+
             //additional
             services.AddMvc().AddJsonOptions(opts =>
             {
@@ -53,17 +62,22 @@ namespace FreelancerWeb
             {
             });
 
+            //Services
             services.AddTransient<IAuthorizationService, AuthorizationService>();
             services.AddTransient<IUserDataService, UserDataService>();
             services.AddMemoryCache();
-
             //Db connection
-            var sqlConnectionString = Configuration.GetConnectionString("DefaultConnection");
+            const string connectionTemplate = "Host={0};Database={1};Username={2};Password={3}";
+            var host = Configuration["DB_HOST"]     ?? "localhost";
+            var db   = Configuration["DB_DATABASE"] ?? "freelancer_bd";
+            var user = Configuration["DB_USER"]     ?? "postgres";
+            var pass = Configuration["DB_PASS"]     ?? "5690";
+            var sqlConnectionString = string.Format(connectionTemplate, host, db, user, pass);
             services.AddDbContext<FreelancerContext>(OptionsBuilder
-                => OptionsBuilder.UseNpgsql(sqlConnectionString)
-                );
-
+                => OptionsBuilder.UseNpgsql(sqlConnectionString));
+            //Controllers
             services.AddControllersWithViews();
+            //Swagger
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -71,32 +85,10 @@ namespace FreelancerWeb
                     Title = "Freelancer Rest Service",
                     Version = "v1"
                 });
-
-                var reference = new OpenApiReference
-                {
-                    Id = FreelancerAuthDefaults.AuthenticationScheme,
-                    Type = ReferenceType.SecurityScheme
-                };
-
-                var secScheme = new OpenApiSecurityScheme
-                {
-                    Name = "JWT Auth",
-                    Description = "Pass JWT Bearer token to the Authrozation section of header",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    Reference = reference
-                };
-
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {secScheme, new string[] { } }
-                });
-
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath, true);
+                c.OperationFilter<AuthOperationAttribute>();
             });
         }
 
@@ -105,6 +97,7 @@ namespace FreelancerWeb
         {
             if (env.IsDevelopment())
             {
+                Console.WriteLine("Cert Directory: " + Directory.GetCurrentDirectory());
                 app.UseDeveloperExceptionPage();
             }
 
@@ -121,21 +114,18 @@ namespace FreelancerWeb
             /*-------------------------END ROUTING ZONE---------------------------*/
             app.UseEndpoints(endpoints =>
             {
-
-                /*endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("This main page of lab4 HTTPS Service." +
-                        " Use /order for Customer and /applications for Freelancer");
-                });*/
                 endpoints.MapDefaultControllerRoute();
             });
 
-            app.UseSwagger();
+            app.UseSwagger(c =>
+            {
+                
+            });
 
             app.UseSwaggerUI(options =>
             {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-                options.RoutePrefix = string.Empty;// "/swagger";
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Freelancer API V1");
+                options.RoutePrefix = string.Empty;
             });
         }
     }

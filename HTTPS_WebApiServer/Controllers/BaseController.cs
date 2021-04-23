@@ -5,10 +5,13 @@ using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using FreelancerWeb.Authentication;
 using System.Security.Claims;
+using Swashbuckle.Swagger.Annotations;
+using System.Net;
 
 namespace FreelancerWeb.Controllers
 {
     [Authorize(AuthenticationSchemes = FreelancerAuthDefaults.AuthenticationScheme)]
+    [SwaggerResponse(HttpStatusCode.Unauthorized, Description = "Invalid token")]
     public class BaseController : Controller
     {
         protected int Id { get 

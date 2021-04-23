@@ -18,8 +18,7 @@ WORKDIR /app
 EXPOSE 8002
 EXPOSE 8003
 ENV ASPNETCORE_ENVIRONMENT Production
-ENV ASPNETCORE_URLS=http://*:8002,https://*:8003
+ENV ASPNETCORE_URLS=http://*:8002;https://*:8003
 COPY --from=build-env /app ./
+COPY appsettings.json /app
 ENTRYPOINT ["dotnet", "FreelancerWeb.dll"]
-
-#9b4a9c5c-b2ac-49f6-b35b-a899c2d5e644

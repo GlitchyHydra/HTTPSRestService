@@ -13,9 +13,6 @@ namespace DataLayer
             NpgsqlConnection.GlobalTypeMapper.MapEnum<ApplcationStatus>("application_status");
             NpgsqlConnection.GlobalTypeMapper.MapEnum<WorkStatus>("work_status");
         }
-        
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseNpgsql("Host=freelancer-web-network;Database=freelancer_bd;Username=postgres;Password=5690");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

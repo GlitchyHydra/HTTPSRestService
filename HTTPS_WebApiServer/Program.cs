@@ -35,7 +35,7 @@ namespace FreelancerWeb
                     options.ConfigureHttpsDefaults(h =>
                     {
                         h.UseLettuceEncrypt(appServices);
-                        //h.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+                        h.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
                         h.SslProtocols = SslProtocols.Tls12;
                     });
                     options.ListenAnyIP(HttpPort, listenOptions =>

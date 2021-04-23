@@ -7,6 +7,10 @@ using System;
 using Microsoft.AspNetCore.Authorization;
 using FreelancerWeb.Authorization;
 using System.Linq;
+using Swashbuckle.Swagger.Annotations;
+using System.Net;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 namespace FreelancerWeb.Controllers
 {
@@ -28,37 +32,48 @@ namespace FreelancerWeb.Controllers
         /// </summary>
         /// <param name="order_id">Id of order for applying</param>
         /// <returns></returns>
-        /// <response code="200">string answer of inserting result</response>
-        /// <response code="401">lack of token in header</response>
+        /// <response code="200">Application to order was inserted</response>
+        /// <response code="500">Error in application inserting</response>
         [HttpPost("{order_id:int}")]
         [Authorize(Roles = WebRoles.Freelancer)]
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(FreelancerResponse), Description = "Application to order was inserted")]
         public async Task<IActionResult> InsertApplication(int order_id)
         {
             var freelancerId = Id;
-            if (freelancerId == NotAuthroized)
-                return Unauthorized(new { errorText = TokenInvalidAnswer });
+            if (freelancerId == NotAuthroized) return Unauthorized(new FreelancerResponse { Message = TokenInvalidAnswer });
             var res = await orders_service.InsertApplication(freelancerId, order_id);
-            return res ? Ok(new { Answer = "You succesfully applied to order" })
-                : Ok(new { Answer = "Error in application inserting" });
+            if (res) return Ok(new FreelancerResponse { Message = "You successfully applied to order" });
+            else     return StatusCode(StatusCodes.Status500InternalServerError,
+                new FreelancerResponse() { Message = "Error in application inserting" });
         }
 
         /// <summary>
         /// Add an order
         /// </summary>
+        /// <remarks>
+        /// POST /orders
+        /// {
+        ///     "Name": "Order1",
+        ///     "Desc": "Empty Description"
+        /// }
+        /// </remarks>
         /// <param name="model">Order title and description</param>
         /// <returns></returns>
-        /// <response code="200">string answer of inserting result</response>
-        /// <response code="401">lack of token in header</response>
+        /// <response code="200">Order was inserted</response>
+        /// <response code="400">Need to specify an order name in model</response>
+        /// <response code="500">Error in order inserting</response>
         [HttpPost]
         [Authorize(Roles = WebRoles.Customer)]
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(FreelancerResponse), Description = "Order was insterted")]
         public async Task<IActionResult> InsertOrder([FromBody] OrderModel model)
         {
-            if (model is null) return BadRequest("Lack of order name");
+            if (model is null) return BadRequest(new FreelancerResponse { Message = "Lack of order name" });
             var customerId = Id;
-            if (customerId == NotAuthroized)
-                return Unauthorized(new { errorText = "Invalid token" });
+            if (customerId == NotAuthroized) return Unauthorized(new FreelancerResponse{ Message = TokenInvalidAnswer });
             var res = await orders_service.InsertOrder(customerId, model);
-            return res ? Ok(new { Answer = "Order inserted" }) : Ok(new { Answer = "Error in order inserting" });
+            if (res) return Ok(new FreelancerResponse { Message = "Order was inserted" });
+            else return StatusCode(StatusCodes.Status500InternalServerError, 
+                new FreelancerResponse() { Message = "Error in order inserting" });
         }
 
         /// <summary>
@@ -68,10 +83,11 @@ namespace FreelancerWeb.Controllers
         /// </summary>
         /// <param name="status">Status filter("open", "processing", "close")</param>
         /// <returns></returns>
-        /// <response code="200">orders</response>
-        /// <response code="401">lack of token in header</response>
+        /// <response code="200">Orders owned by a customer
+        /// or opened orders if freelancer is logged</response>
         [HttpGet("{status?}")]
         [Authorize()]
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(IList<Order>), Description = "Orders by status")]
         public async Task<IActionResult> GetOrders(string status)
         {
             OrderStatus order_status = Enum.GetNames(typeof(OrderStatus)).Contains(status) 
@@ -81,12 +97,12 @@ namespace FreelancerWeb.Controllers
             if (order_status == OrderStatus.Open) user_action = UserActions.GetOpenedOrders;
             else user_action = UserActions.GetOrders;
             UserRole role = GetRole();
-            if (!UserActionManager.IsAuthorized(role, user_action))
-                return Unauthorized(new { errorText = TokenInvalidAnswer });
             var user_id = Id;
-            if (Id == NotAuthroized)
-                return Unauthorized(new { errorText = TokenInvalidAnswer });
-            var res = await orders_service.GetOrders(user_id, order_status);
+            if (!UserActionManager.IsAuthorized(role, user_action) || Id == NotAuthroized)
+                return Unauthorized(new FreelancerResponse{ Message = TokenInvalidAnswer });
+            var res = role == UserRole.Customer 
+                ? await orders_service.GetOrdersByCustomerId(user_id, order_status)
+                : await orders_service.GetOrders(order_status);
             return Ok(res);
         }
 
@@ -96,21 +112,22 @@ namespace FreelancerWeb.Controllers
         /// <param name="id">id of the order for updating</param>
         /// <param name="up_status">new status</param>
         /// <returns></returns>
-        /// <response code="200">string answer of updating result</response>
-        /// <response code="401">lack of token in header</response>
+        /// <response code="200">Order status was updated</response>
+        /// <response code="400">Need to specify an order status</response>
+        /// <response code="500">Error in order status updating</response>
         [HttpPut("{id:int}")]
         [Authorize(Roles = WebRoles.Customer)]
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(FreelancerResponse), Description = "Order status was updated")]
         public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] StatusUpdateModel up_status)
         {
-            if (up_status is null) return BadRequest(new { errorText = "Order status required" });
+            if (up_status is null) return BadRequest(new FreelancerResponse{ Message = "Order status required" });
             var customerId = Id;
-            if (customerId == NotAuthroized)
-                return Unauthorized(new { errorText = TokenInvalidAnswer });
+            if (customerId == NotAuthroized) return Unauthorized(new FreelancerResponse{ Message = TokenInvalidAnswer });
             OrderStatus order_status = (OrderStatus)System.Enum.Parse(typeof(OrderStatus), up_status.status, true);
             var res = await orders_service.UpdateOrderStatus((int)id, order_status);
-            return res 
-                ? Ok(new { Answer = "Updated Sucessfully" })
-                : Ok(new { Answer = "Error in order status updating" });
+            if (res) return Ok(new FreelancerResponse { Message = "Order status was updated" });
+            else return StatusCode(StatusCodes.Status500InternalServerError,
+                new FreelancerResponse() { Message = "Error in order status updating" });
         }
     }
 }

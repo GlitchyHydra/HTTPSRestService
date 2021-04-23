@@ -1,12 +1,13 @@
 services:
   db:
+    container_name: pdb
     image: postgres
     networks:
      - freelancer-web-network
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: '5690'
-      POSTGRES_DB: freelancer_db
+      POSTGRES_DB: freelancer_bd
     volumes: 
      - ./docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
   web:
@@ -22,8 +23,12 @@ services:
      - "8002:8002"
      - "8003:8003"
     environment:
-     - "ASPNETCORE_ENVIRONMENT=Development"
-     - "ASPNETCORE_URLS=https://+:8003;http://+:8002"
+     - ASPNETCORE_ENVIRONMENT=Production
+     - ASPNETCORE_URLS=https://+:8003;http://+:8002
+     - DB_HOST=pdb
+     - DB_DATABASE=freelancer_bd
+     - DB_USER=postgres
+     - DB_PASS=5690
     depends_on:
      - db
     networks:
