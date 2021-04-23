@@ -7,6 +7,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: '5690'
       POSTGRES_DB: freelancer_db
+    volumes: 
+     - ./docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
   web:
     container_name: asp
     image: glitchyhydra/freelancer_web
