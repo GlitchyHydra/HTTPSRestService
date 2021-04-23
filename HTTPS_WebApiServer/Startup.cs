@@ -30,11 +30,11 @@ namespace FreelancerWeb
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHttpsRedirection(options =>
+            /*services.AddHttpsRedirection(options =>
             {
-                options.HttpsPort = 8003;
-            });
-            services.AddLettuceEncrypt().PersistDataToDirectory(new DirectoryInfo("D:/data/Lettuce/Ecnrypt"), "57247LaLol22"); ;
+                options.HttpsPort = 443;
+            });*/
+            services.AddLettuceEncrypt().PersistDataToDirectory(new DirectoryInfo("/app"), "57247LaLol22"); ;
             //additional
             services.AddMvc().AddJsonOptions(opts =>
             {
@@ -109,7 +109,7 @@ namespace FreelancerWeb
             }
 
             /*--------------------------ROUTING ZONE----------------------------*/
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             //add endpoint resolution middlware
             app.UseRouting();
